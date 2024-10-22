@@ -1,4 +1,6 @@
 import uuid
+from bson import ObjectId
+from flask import jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from Schemas.schemas import BookSchema, BookPatchSchema
@@ -13,15 +15,16 @@ class Book(MethodView):
     def get(self, bookID):
         book = redis_client.get(f"book:{bookID}")
         if book:
-            return eval(book)
+            return jsonify(eval(book))
         
         book = books_collection.find_one({"id": bookID})
         if book is None:
             abort(404, message="Book not found")
         
+        book["_id"] = str(book["_id"])
         redis_client.setex(f"book:{bookID}", 600, str(book))
         
-        return book
+        return jsonify(book)
 
     def delete(self, bookID):
         result = books_collection.delete_one({"id": bookID})
@@ -108,6 +111,8 @@ class bookTitles(MethodView):
         matching_books = list(books_collection.find({"title": {"$regex": title, "$options": "i"}}))
 
         if matching_books:  
-            return matching_books 
+            for book in matching_books:
+                book["_id"] = str(book["_id"])
+            return jsonify(matching_books)
 
-        abort(404, message="No books found matching the title")  
+        abort(404, message="No books found matching the title")
