@@ -1,0 +1,38 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/mongo_data
+    depends_on:
+      - mongo
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: development
+      MONGO_URI: "mongodb://mongo:27017/library"
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
+
+
+
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+  
+  redis:
+    image: redis:7.0
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+
+volumes:
+  mongo_data:
+  redis_data:

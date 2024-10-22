@@ -1,0 +1,5 @@
+Flask
+Flask-smorest
+python-dotenv
+pymongo
+redis
