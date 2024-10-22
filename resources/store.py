@@ -2,6 +2,8 @@ import uuid
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from Schemas.schemas import StoreSchema
+from bson import ObjectId
+from flask import jsonify
 from db import stores_collection
 from db import redis_client
 
@@ -13,15 +15,17 @@ class Store(MethodView):
     def get(self, storeID):
         store = redis_client.get(f"store:{storeID}")
         if store:
-            return eval(store)
+            return jsonify(eval(store))
         
-        store = stores_collection.find_one({"id": storeID})
+        store = stores_collection.find_one({"_id": ObjectId(storeID)})
         if store is None:
             abort(404, message="Bookstore not found")
         
-        redis_client.setex(f"store:{storeID}", 600, str(store))
+        store["_id"] = str(store["_id"])
         
-        return store
+        redis_client.setex(f"store:{storeID}", 600, str(store))
+
+        return jsonify(store) 
     
     def delete(self, storeID):
         result = stores_collection.delete_one({"id": storeID}) 
