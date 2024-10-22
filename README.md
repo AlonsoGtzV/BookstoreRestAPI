@@ -94,3 +94,5 @@ Este comando detiene los contenedores sin eliminar las imágenes.
 ```bash
 docker-compose up --build
 ```
+
+Para probar la API puedes utilizar swagger-ui, que se encuentra en http://localhost:5000/swagger-ui
